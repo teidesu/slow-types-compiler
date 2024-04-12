@@ -1,0 +1,34 @@
+{
+    "name": "slow-types-compiler",
+    "type": "module",
+    "version": "1.0.0",
+    "description": "",
+    "author": "alina sireneva <alina@tei.su>",
+    "license": "MIT",
+    "scripts": {
+        "test": "vitest"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "arg": "^5.0.2",
+        "dedent": "^1.5.1",
+        "eager-async-pool": "^1.0.0",
+        "gunzip-maybe": "^1.4.2",
+        "semver": "^7.6.0",
+        "tar-stream": "^3.1.7",
+        "ts-morph": "22.0.0"
+    },
+    "devDependencies": {
+        "@antfu/eslint-config": "^2.12.1",
+        "@types/gunzip-maybe": "^1.4.2",
+        "@types/node": "^20.12.4",
+        "@types/semver": "^7.5.8",
+        "@types/tar-stream": "^3.1.3",
+        "tsx": "^4.7.2",
+        "typescript": "^5.4.4",
+        "vite": "^5.2.8",
+        "vitest": "^1.4.0"
+    }
+}

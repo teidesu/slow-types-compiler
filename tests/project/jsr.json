@@ -1,0 +1,17 @@
+{
+    "name": "@mtcute/tl-utils",
+    "version": "0.10.0",
+    "exports": {
+        "./complex-default-export": "./complex-default-export.ts",
+        "./implicit-const-type": "./implicit-const-type.ts",
+        "./implicit-field-type": "./implicit-field-type.ts",
+        "./implicit-param-type": "./implicit-param-type.ts",
+        "./implicit-return-type": "./implicit-return-type.ts",
+        "./private-field-typeref": "./private-field-typeref.ts",
+        "./superclass-expressions": "./superclass-expressions.ts",
+        "./exports/entry": "./exports/entry.ts"
+    },
+    "imports": {
+        "long": "npm:long@5.2.3"
+    }
+}
