@@ -47,13 +47,6 @@ async function main(imports: Record<string, ImportSpecifier>, requests?: string[
     }))
 }
 
-// const { sharedBuffer, workerPort } = workerData
-// const sharedArray = new Int32Array(sharedBuffer)
-
-// workerPort.on('message', (msg) => {
-//     console.log(msg)
-// })
-
 const args = JSON.parse(process.argv[2]) as Parameters<typeof main>
 const start = Date.now()
 main(...args).then((result) => {

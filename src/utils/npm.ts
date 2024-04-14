@@ -139,7 +139,7 @@ export async function determineNpmEntrypoint(pkgPath: string, request: string) {
     }
 
     // default export
-    if (request === '') {
+    if (request === '.') {
         if ('types' in pkgJson && typeof pkgJson.types === 'string') {
             return resolveMaybeDts(pkgJson.types)
         }
