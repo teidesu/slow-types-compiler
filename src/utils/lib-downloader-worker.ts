@@ -31,7 +31,7 @@ async function main(imports: Record<string, ImportSpecifier>, requests?: string[
             spec = imports[pkg]
         }
         if (!spec) {
-            return { error: `cannot resolve package: ${pkg}` }
+            return { error: `cannot resolve package: ${pkg} (${request})` }
         }
 
         switch (spec.registry) {

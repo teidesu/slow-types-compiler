@@ -7,7 +7,7 @@ import semver from 'semver'
 import { asyncPoolCallback } from 'eager-async-pool'
 import { type ImportSpecifier, getModuleCacheDirectory } from './external-libs.js'
 import { webStreamToNode } from './stream-utils.js'
-import { type JsrJson, parseJsrJson } from './jsr-json.js'
+import { type JsrJson, findClosestJsrJson, parseJsrJson } from './jsr-json.js'
 import { fileExists } from './fs.js'
 
 const REGISTRY = process.env.JSR_URL || 'https://jsr.io'
@@ -125,4 +125,50 @@ export async function determineJsrEntrypoint(pkgPath: string, request: string) {
     }
 
     return resolveMaybeDts(jsr.exports[request])
+}
+
+export function backResolveJsrEntrypoint(path: string) {
+    if (!path.match(/\.[a-z]+$/)) {
+        // try some extensions
+        for (const ext of ['.d.ts', '.js', '.cjs', '.mjs', '.ts']) {
+            try {
+                return backResolveJsrEntrypoint(path + ext)
+            } catch {}
+        }
+
+        throw new Error(`Cannot back-resolve ${path}`)
+    }
+
+    const jsrJsonPath = findClosestJsrJson(path)
+    if (!jsrJsonPath) {
+        throw new Error(`No jsr.json found for ${path}`)
+    }
+    const pkgPath = dirname(jsrJsonPath)
+    const request = `./${path.slice(pkgPath.length + 1)}`
+
+    const jsr = parseJsrJson(fs.readFileSync(jsrJsonPath, 'utf8'))
+
+    if (typeof jsr.exports === 'string' && request === jsr.exports) return '.'
+
+    if (request.endsWith('.d.ts')) {
+        // dirty hack: check all js/ts files and check if they reference this d.ts file
+        for (let file of fs.readdirSync(pkgPath, { recursive: true })) {
+            if (file instanceof Buffer) file = file.toString()
+
+            if (!file.match(/(?<!\.d)\.m?[jt]s$/)) continue
+
+            const content = fs.readFileSync(join(pkgPath, file), 'utf8')
+            if (content.includes(`/// <reference types="${request}" />`)) {
+                return backResolveJsrEntrypoint(join(pkgPath, file))
+            }
+        }
+
+        throw new Error(`Export not found: ${request}`)
+    }
+
+    for (const [key, value] of Object.entries(jsr.exports)) {
+        if (value === request) return key
+    }
+
+    throw new Error(`Export not found: ${request}`)
 }

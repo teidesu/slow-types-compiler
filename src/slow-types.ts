@@ -1,5 +1,7 @@
 import type { ClassDeclaration, ModifierableNode, Node, ParameteredNode, ReturnTypedNode, SourceFile, TypedNode, VariableDeclaration, WriterFunction } from 'ts-morph'
 import { ts } from 'ts-morph'
+import { getModuleCacheDirectory } from './utils/external-libs.js'
+import { backwardsResolveLibEntrypoint } from './utils/lib-downloader.js'
 
 function maybeFixImportedType(file: SourceFile, code: string) {
     // todo: is there a better way to do this?
@@ -25,15 +27,20 @@ function maybeFixImportedType(file: SourceFile, code: string) {
             let text = node.getLiteralText()
             let textChanged = false
 
-            if (text[0] !== '.') {
+            if (text.startsWith(getModuleCacheDirectory())) {
+                text = backwardsResolveLibEntrypoint(text)
+                textChanged = true
+            } else {
+                if (text[0] !== '.') {
                 // relative path
-                text = file.getRelativePathAsModuleSpecifierTo(text)
-                textChanged = true
-            }
+                    text = file.getRelativePathAsModuleSpecifierTo(text)
+                    textChanged = true
+                }
 
-            if (!text.match(/\.[a-z0-9]+$/)) {
-                text += '.ts'
-                textChanged = true
+                if (!text.match(/\.[a-z0-9]+$/)) {
+                    text += '.ts'
+                    textChanged = true
+                }
             }
 
             if (textChanged) {

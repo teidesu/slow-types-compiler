@@ -1,6 +1,7 @@
 import process from 'node:process'
 import { join } from 'node:path'
 import * as fsp from 'node:fs/promises'
+import * as fs from 'node:fs'
 
 import semver from 'semver'
 import { type ImportSpecifier, getModuleCacheDirectory } from './external-libs.js'
@@ -160,4 +161,76 @@ export async function determineNpmEntrypoint(pkgPath: string, request: string) {
     }
 
     throw new Error(`Could not resolve ${request} in ${pkgPath}`)
+}
+
+export function backResolveNpmEntrypoint(path: string): string {
+    if (!path.match(/\.[a-z]+$/)) {
+        // try some extensions
+        for (const ext of ['.d.ts', '.js', '.cjs', '.mjs', '.ts']) {
+            try {
+                return backResolveNpmEntrypoint(path + ext)
+            } catch {}
+        }
+
+        throw new Error(`Cannot back-resolve ${path}`)
+    }
+
+    let pkgPath = path
+    while (true) {
+        pkgPath = join(pkgPath, '..')
+        if (fs.existsSync(join(pkgPath, 'package.json'))) {
+            break
+        }
+        if (pkgPath === '/') {
+            throw new Error('No package.json found')
+        }
+    }
+    const request = `./${path.slice(pkgPath.length + 1)}`
+
+    if (!_packageJsonCache.has(pkgPath)) {
+        _packageJsonCache.set(pkgPath, JSON.parse(fs.readFileSync(join(pkgPath, 'package.json'), 'utf8')))
+    }
+
+    const pkgJson = _packageJsonCache.get(pkgPath)!
+    if (typeof pkgJson !== 'object' || pkgJson === null) {
+        throw new Error('Invalid package.json')
+    }
+
+    const pathWithoutDts = path.endsWith('.d.ts') ? path.slice(0, -5) : '' // so it can never match
+
+    if ('exports' in pkgJson) {
+        if (typeof pkgJson.exports === 'string') {
+            if (request === '') return pkgJson.exports
+            throw new Error(`Cannot back-resolve ${request} for ${pkgPath}`)
+        }
+
+        if (!pkgJson.exports || typeof pkgJson.exports !== 'object') {
+            throw new Error('Invalid exports field in package.json')
+        }
+
+        for (const [key, value] of Object.entries(pkgJson.exports)) {
+            if (typeof value === 'string') {
+                if (value === request) return key
+                if (key.endsWith('*') && request.startsWith(value.slice(0, -1))) {
+                    return key.slice(0, -1) + request.slice(value.length)
+                }
+            }
+
+            for (const v of Object.values(value)) {
+                if (typeof v === 'string' && v === request) {
+                    return key
+                }
+                if (typeof v === 'object' && v !== null) {
+                    if ('types' in v && v.types === request) {
+                        return key
+                    }
+                    if ('import' in v && v.import === pathWithoutDts) {
+                        return key
+                    }
+                }
+            }
+        }
+    }
+
+    throw new Error(`Cannot back-resolve ${request} for ${pkgPath}`)
 }

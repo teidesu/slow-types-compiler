@@ -2,7 +2,10 @@ import { createRequire } from 'node:module'
 import { execFileSync } from 'node:child_process'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
-import type { ImportSpecifier } from './external-libs.js'
+import { join, sep } from 'node:path'
+import { type ImportSpecifier, getModuleCacheDirectory } from './external-libs.js'
+import { backResolveNpmEntrypoint } from './npm.js'
+import { backResolveJsrEntrypoint } from './jsr.js'
 
 // const sharedBuffer = new SharedArrayBuffer(4)
 // const sharedArray = new Int32Array(sharedBuffer)
@@ -98,4 +101,29 @@ export function resolveLibEntrypoints(imports: Record<string, ImportSpecifier>, 
     }
 
     return ret
+}
+
+export function backwardsResolveLibEntrypoint(path: string): string {
+    const cacheDir = getModuleCacheDirectory()
+    if (!path.startsWith(cacheDir)) {
+        throw new Error(`Invalid path: ${path}`)
+    }
+
+    const [registry, _domain, specifier] = path.slice(cacheDir.length + 1).split(sep)
+
+    let request
+    switch (registry) {
+        case 'npm':
+            request = backResolveNpmEntrypoint(path)
+            break
+        case 'jsr':
+            request = backResolveJsrEntrypoint(path)
+            break
+        default:
+            throw new Error(`Unknown registry: ${registry}`)
+    }
+
+    if (request.startsWith('.')) request = request.slice(1)
+
+    return `${registry}:${specifier.replace('+', '/')}${request}`
 }

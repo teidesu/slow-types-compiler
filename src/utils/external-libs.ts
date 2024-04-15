@@ -1,18 +1,20 @@
 import { join } from 'node:path'
 import process from 'node:process'
 
+let _cacheDir: string | undefined
 export function getModuleCacheDirectory(): string {
     if (process.env.STC_CACHE_DIR) return process.env.STC_CACHE_DIR
+    if (_cacheDir) return _cacheDir
 
     switch (process.platform) {
         case 'win32': {
-            return join(process.env.LOCALAPPDATA || process.env.APPDATA || 'C:', 'stc-cache')
+            return _cacheDir = join(process.env.LOCALAPPDATA || process.env.APPDATA || 'C:', 'stc-cache')
         }
         case 'darwin': {
-            return join(process.env.HOME || '/tmp', 'Library', 'Caches', 'stc')
+            return _cacheDir = join(process.env.HOME || '/tmp', 'Library', 'Caches', 'stc')
         }
         default: {
-            return join(process.env.XDG_CACHE_HOME || process.env.HOME || '/tmp', '.cache', 'stc')
+            return _cacheDir = join(process.env.XDG_CACHE_HOME || process.env.HOME || '/tmp', '.cache', 'stc')
         }
     }
 }
