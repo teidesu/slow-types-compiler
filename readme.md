@@ -5,6 +5,9 @@ poc compiler for jsr [slow types](https://jsr.io/docs/about-slow-types)
 this package is intended to be a placeholder and a proof of concept while deno team comes up with a
 blazing fast🚀🦀™ solution for that
 
+**disclaimer**: this pile of garbage is not actively maintained, meaning that prs will probably be merged but no issues will be addressed by me
+because i just don't care enough. it will probably not work out of the box for you, too. feel free to fork and adapt it to your needs
+
 > currently not published anywhere, as it's still very much wip
 
 ## usage
