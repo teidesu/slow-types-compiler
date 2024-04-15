@@ -32,7 +32,7 @@ function maybeFixImportedType(file: SourceFile, code: string) {
                 textChanged = true
             } else {
                 if (text[0] !== '.') {
-                // relative path
+                    // relative path
                     text = file.getRelativePathAsModuleSpecifierTo(text)
                     textChanged = true
                 }
@@ -136,6 +136,34 @@ function isTypeQueryOfPrivateField(cls: ClassDeclaration, typeNode: Node) {
     return field && !isPublicField(field)
 }
 
+function processReferencedTypes(node: Node) {
+    node.forEachDescendant((node) => {
+        if (!node.isKind(ts.SyntaxKind.Identifier)) return
+        const defs = node.getDefinitions()
+        if (defs.length !== 1) return
+
+        const def = defs[0]
+        const defNode = def.getNode().getParent()
+        if (!defNode) return
+
+        switch (true) {
+            case defNode.isKind(ts.SyntaxKind.ClassDeclaration): {
+                processClass(defNode)
+                break
+            }
+            case defNode.isKind(ts.SyntaxKind.VariableDeclaration): {
+                processVariableDeclaration(defNode)
+                break
+            }
+            case defNode.isKind(ts.SyntaxKind.FunctionDeclaration): {
+                const file = defNode.getSourceFile()
+                fixReturnTypes(file, defNode)
+                fixParamsTypes(file, defNode)
+            }
+        }
+    })
+}
+
 function processClass(cls: ClassDeclaration) {
     if (isNodeProcessed(cls)) return
     markNodeProcessed(cls)
@@ -189,22 +217,10 @@ function processClass(cls: ClassDeclaration) {
             typeNode.forEachDescendant((node) => {
                 if (isTypeQueryOfPrivateField(cls, node)) {
                     node.replaceWithText(maybeFixImportedType(file, node.getType().getText(node)))
-                    return
-                }
-
-                if (node.isKind(ts.SyntaxKind.Identifier)) {
-                    const defs = node.getDefinitions()
-                    if (defs.length !== 1) return
-
-                    const def = defs[0]
-                    const defNode = def.getNode().getParent()
-
-                    if (defNode?.isKind(ts.SyntaxKind.ClassDeclaration)) {
-                        // this class is a part of public API, process it
-                        processClass(defNode)
-                    }
                 }
             })
+
+            processReferencedTypes(typeNode)
         }
     }
 
@@ -278,6 +294,14 @@ function processDestructuring(decls: Set<VariableDeclaration>) {
     }
 }
 
+function processVariableDeclaration(decl: VariableDeclaration) {
+    const file = decl.getSourceFile()
+    const typeNode = decl.getTypeNode()
+    if (!typeNode) {
+        decl.setType(maybeFixImportedType(file, decl.getType().getText(decl)))
+    }
+}
+
 function processDefaultExports(file: SourceFile) {
     const exportAssignments = file.getExportAssignments()
     if (!exportAssignments.length) return
@@ -312,9 +336,7 @@ export function processEntrypoint(file: SourceFile) {
 
         switch (true) {
             case decl.isKind(ts.SyntaxKind.VariableDeclaration): {
-                if (decl.getTypeNode()) continue // already has type, skip
-
-                decl.setType(maybeFixImportedType(decl.getSourceFile(), decl.getType().getText(decl)))
+                processVariableDeclaration(decl)
                 break
             }
             case decl.isKind(ts.SyntaxKind.FunctionDeclaration): {
@@ -338,6 +360,9 @@ export function processEntrypoint(file: SourceFile) {
                 // export { foo }
                 processEntrypoint(decl)
                 break
+            }
+            case decl.isKind(ts.SyntaxKind.TypeAliasDeclaration): {
+                processReferencedTypes(decl.getTypeNodeOrThrow())
             }
         }
     }

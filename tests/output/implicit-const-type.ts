@@ -20,6 +20,9 @@ export const reexport: () => number = implicitFunction
 export const mixed1: () => number = implicitFunction, mixed2: () => number = implicitFunction
 export const shouldKeepType: Foo | null = { a: 1, b: 'asd', c: [1, 'a'] }
 
+const inner: 123 = 123
+export type InnerTypeRef = typeof inner
+
 // destructuring
 const __$STC_TMP_0 = { foo: 5, bar: 'world' }
 export const foo: number = __$STC_TMP_0.foo

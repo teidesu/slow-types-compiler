@@ -64,3 +64,9 @@ export class Class {
         return 1
     }
 }
+
+export function internalFn(): number {
+    return 42
+}
+
+export type IntenalFnRet = ReturnType<typeof internalFn>

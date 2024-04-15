@@ -20,6 +20,9 @@ export const reexport = implicitFunction
 export const mixed1 = implicitFunction, mixed2 = implicitFunction
 export const shouldKeepType: Foo | null = { a: 1, b: 'asd', c: [1, 'a'] }
 
+const inner = 123
+export type InnerTypeRef = typeof inner
+
 // destructuring
 export const { foo, bar } = { foo: 5, bar: 'world' }
 // these should not mix up
