@@ -1,31 +1,15 @@
-import { createRequire } from 'node:module'
 import { execFileSync } from 'node:child_process'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
-import { join, sep } from 'node:path'
+import { dirname, join, sep } from 'node:path'
 import { type ImportSpecifier, getModuleCacheDirectory } from './external-libs.js'
 import { backResolveNpmEntrypoint } from './npm.js'
 import { backResolveJsrEntrypoint } from './jsr.js'
 
-// const sharedBuffer = new SharedArrayBuffer(4)
-// const sharedArray = new Int32Array(sharedBuffer)
-// Atomics.store(sharedArray, 0, 0)
-// const { port1: mainPort, port2: workerPort } = new MessageChannel()
-
-// const worker: Worker | null = null
-// let nextId = 0
-// function maybeCreateWorker() {
-//     if (worker) return worker
-
-//     // based on https://github.com/un-ts/synckit/blob/main/src/index.ts
-//     const url = new URL('./lib-downloader-worker.ts', import.meta.url)
-
-//     // worker.unref()
-
-//     return worker
-// }
-
-const workerPath = fileURLToPath(new URL('./lib-downloader-worker.ts', import.meta.url))
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const workerPath = import.meta.env?.PROD
+    ? join(__dirname, 'worker.js')
+    : fileURLToPath(new URL('./lib-downloader-worker.ts', import.meta.url))
 // @ts-expect-error bun global
 const executable = import.meta.env?.PROD || typeof Bun !== 'undefined' ? process.execPath : 'tsx'
 

@@ -1,14 +1,9 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 import process from 'node:process'
-import * as fs from 'node:fs'
-import * as path from 'node:path'
 
 import arg from 'arg'
 
-import { processEntrypoint } from './slow-types.js'
-import { parseJsrJson } from './utils/jsr-json.js'
-import { preDownloadLibs } from './utils/lib-downloader.js'
 import { createProject, processPackage } from './project.js'
 
 const args = arg({
