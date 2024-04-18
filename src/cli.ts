@@ -2,6 +2,7 @@
 /* eslint-disable no-console */
 import process from 'node:process'
 
+import { isAbsolute, join } from 'node:path'
 import arg from 'arg'
 
 import { createProject, processPackage } from './project.js'
@@ -22,7 +23,12 @@ switch (action) {
 
         const project = createProject()
 
-        processPackage(project, args['--entry'])
+        let entry = args['--entry']
+        if (!isAbsolute(entry)) {
+            entry = join(process.cwd(), entry)
+        }
+
+        processPackage(project, entry)
 
         if (args['--dry-run']) {
             const unsavedSourceFiles = project.getSourceFiles().filter(s => !s.isSaved())
