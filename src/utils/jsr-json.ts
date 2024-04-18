@@ -9,6 +9,7 @@ export interface JsrJson {
     version: string
     exports: string | Record<string, string>
     imports?: Record<string, ImportSpecifier>
+    compilerOptions?: object
 }
 
 export function parseJsrJson(json: string): JsrJson {
@@ -64,6 +65,12 @@ export function parseJsrJson(json: string): JsrJson {
             }
 
             obj.imports[key] = parseImportSpecifier(obj.imports[key])
+        }
+    }
+
+    if (obj.compilerOptions !== undefined) {
+        if (typeof obj.compilerOptions !== 'object' || obj.compilerOptions === null) {
+            throw new TypeError('Expected "compilerOptions" to be an object')
         }
     }
 

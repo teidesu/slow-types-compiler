@@ -87,6 +87,9 @@ export function createProject() {
 export function processPackage(project: Project, jsrJsonPath: string) {
     const packageDir = dirname(jsrJsonPath)
     const jsr = parseJsrJson(fs.readFileSync(jsrJsonPath, 'utf-8'))
+    if (jsr.compilerOptions) {
+        project.compilerOptions.set(jsr.compilerOptions)
+    }
 
     // pre-download root jsr.json libraries
     if (jsr.imports) preDownloadLibs(jsr.imports)
