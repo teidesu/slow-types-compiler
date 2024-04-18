@@ -22,7 +22,7 @@ export default defineConfig({
                 cli: './src/cli.ts',
                 worker: './src/utils/lib-downloader-worker.ts',
             },
-            formats: ['es'],
+            formats: ['es', 'cjs'],
         },
         minify: false,
         outDir: './dist',

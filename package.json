@@ -1,10 +1,14 @@
 {
-    "name": "@tei/slow-types-compiler",
+    "name": "@teidesu/slow-types-compiler",
     "type": "module",
     "version": "1.0.0",
     "author": "alina sireneva <alina@tei.su>",
     "license": "MIT",
-    "exports": "./dist/index.js",
+    "exports": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+    },
     "bin": {
         "slow-types-compiler": "./dist/cli.js"
     },
