@@ -10,7 +10,7 @@ import { webStreamToNode } from './stream-utils.js'
 import { type JsrJson, findClosestJsrJson, parseJsrJson } from './jsr-json.js'
 import { fileExists } from './fs.js'
 
-const REGISTRY = process.env.JSR_URL || 'https://jsr.io'
+const REGISTRY = (process.env.JSR_URL || 'https://jsr.io').replace(/\/$/, '')
 
 export async function downloadJsrPackage(specifier: ImportSpecifier): Promise<string> {
     if (specifier.registry !== 'jsr') {

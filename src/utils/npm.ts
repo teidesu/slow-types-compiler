@@ -28,7 +28,7 @@ export async function downloadNpmPackage(specifier: ImportSpecifier): Promise<st
     }
 
     const targetDir = `${specifier.packageName.replace(/\//g, '+')}@${specifier.version}`
-    const registry = determineRegistryUrl(specifier.packageName)
+    const registry = determineRegistryUrl(specifier.packageName).replace(/\/$/, '')
     const registryHost = new URL(registry).host
     const cacheDir = join(getModuleCacheDirectory(), 'npm', registryHost, targetDir)
 
