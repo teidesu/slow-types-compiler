@@ -17,11 +17,11 @@ pnpx @teidesu/slow-types-compiler fix --entry /path/to/jsr.json
 
 via js:
 ```ts
-import { processEntrypoint } from '@teidesu/slow-types-compiler'
-import { Project } from 'ts-morph'
+import * as stc from '@teidesu/slow-types-compiler'
 
-const project = new Project({ /* ... */ })
-processEntrypoint(project.getSourceFileOrThrow('/path/to/entry.ts'))
+const project = stc.createProject() // ts-morph project
+stc.processPackage(project, '/path/to/deno.json') // or jsr.json
+project.saveSync()
 ```
 
 ## limitations
