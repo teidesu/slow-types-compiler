@@ -6,7 +6,7 @@ import * as fs from 'node:fs'
 import semver from 'semver'
 import { type ImportSpecifier, getModuleCacheDirectory } from './external-libs.js'
 import { untarStream } from './stream-utils.js'
-import { fileExists } from './fs.js'
+import { directoryExists, fileExists } from './fs.js'
 
 const DEFAULT_REGISTRY = process.env.npm_config_registry || 'https://registry.npmjs.org'
 
@@ -87,7 +87,17 @@ export async function determineNpmEntrypoint(pkgPath: string, request: string) {
     async function resolveMaybeDts(jsFile: string) {
         // is there a .d.ts file nearby?
         const jsPath = join(pkgPath, jsFile)
-        if (!jsPath.endsWith('.js')) return jsPath
+        if (!jsPath.endsWith('.js')) {
+            // maybe a directory?
+            if (await directoryExists(jsPath)) {
+                const dtsPath = join(jsPath, 'index.d.ts')
+                if (await fileExists(dtsPath)) {
+                    return dtsPath
+                }
+            }
+
+            return jsPath
+        }
 
         const dtsPath = jsPath.replace(/\.js$/, '.d.ts')
         if (await fileExists(dtsPath)) {
