@@ -8,26 +8,36 @@ import { asyncPoolCallback } from 'eager-async-pool'
 import { type ImportSpecifier, getModuleCacheDirectory } from './external-libs.js'
 import { webStreamToNode } from './stream-utils.js'
 import { type JsrJson, findClosestJsrJson, parseJsrJson } from './jsr-json.js'
-import { fileExists } from './fs.js'
+import { directoryExists, fileExists } from './fs.js'
 
-const REGISTRY = (process.env.JSR_URL || 'https://jsr.io').replace(/\/$/, '')
+const DEFAULT_REGISTRY = process.env.JSR_URL || 'https://jsr.io'
 
-export async function downloadJsrPackage(specifier: ImportSpecifier): Promise<string> {
+export async function downloadJsrPackage(specifier: ImportSpecifier, params?: {
+    registry?: string
+    force?: boolean
+}): Promise<string> {
     if (specifier.registry !== 'jsr') {
         throw new Error('Invalid registry')
     }
 
+    const registry = (params?.registry || DEFAULT_REGISTRY).replace(/\/$/, '')
+
     const targetDir = `${specifier.packageName.replace(/\//g, '+')}@${specifier.version}`
-    const registryHost = new URL(REGISTRY).host
+    const registryHost = new URL(registry).host
     const cacheDir = join(getModuleCacheDirectory(), 'jsr', registryHost, targetDir)
 
     // check if package is already downloaded
-    if (await fileExists(cacheDir)) {
-        return cacheDir
+    if (await directoryExists(cacheDir)) {
+        if (params?.force) {
+            // remove existing package
+            await fsp.rm(cacheDir, { recursive: true })
+        } else {
+            return cacheDir
+        }
     }
 
     // download meta.json
-    const metaUrl = `${REGISTRY}/${specifier.packageName}/meta.json`
+    const metaUrl = `${registry}/${specifier.packageName}/meta.json`
     const metaRes = await fetch(metaUrl)
 
     if (metaRes.status !== 200) {
@@ -45,11 +55,11 @@ export async function downloadJsrPackage(specifier: ImportSpecifier): Promise<st
 
     // jsr doesn't have tarballs, so we have to download the whole package file by file
     await fsp.mkdir(cacheDir, { recursive: true })
-    const versionMeta = await fetch(`${REGISTRY}/${specifier.packageName}/${version}_meta.json`).then(res => res.json()) as { manifest: Record<string, unknown> }
+    const versionMeta = await fetch(`${registry}/${specifier.packageName}/${version}_meta.json`).then(res => res.json()) as { manifest: Record<string, unknown> }
 
     const fetchFile = async (file: string) => {
         file = file.replace(/^\//, '')
-        const fileUrl = `${REGISTRY}/${specifier.packageName}/${version}/${file}`
+        const fileUrl = `${registry}/${specifier.packageName}/${version}/${file}`
         const filePath = join(cacheDir, file)
         await fsp.mkdir(join(filePath, '..'), { recursive: true })
 

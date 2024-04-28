@@ -1,5 +1,6 @@
 export * from './external-libs.js'
 export * from './jsr-json.js'
+export * from './jsr-api.js'
 export * from './jsr.js'
 export * from './lib-downloader.js'
 export * from './npm.js'

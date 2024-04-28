@@ -28,6 +28,7 @@
         "arg": "^5.0.2",
         "dedent": "^1.5.1",
         "eager-async-pool": "^1.0.0",
+        "glob": "^10.3.12",
         "gunzip-maybe": "^1.4.2",
         "semver": "^7.6.0",
         "tar-stream": "^3.1.7",

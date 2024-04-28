@@ -37,11 +37,11 @@ export function parseImportSpecifier(importSpecifier: string): ImportSpecifier {
 
     if (specifier.startsWith('@')) {
         const [pkg, version] = specifier.slice(1).split('@')
-        return { registry, packageName: `@${pkg}`, version }
+        return { registry, packageName: `@${pkg}`, version: version.split('/')[0] }
     }
 
     const [pkg, version] = specifier.split('@')
-    return { registry, packageName: pkg, version }
+    return { registry, packageName: pkg, version: version.split('/')[0] }
 }
 
 export function splitImportRequest(request: string): [string, string] {
