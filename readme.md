@@ -24,6 +24,30 @@ stc.processPackage(project, '/path/to/deno.json') // or jsr.json
 project.saveSync()
 ```
 
+## populate
+
+this package provides a `populate` command that can be used to populate a local
+jsr instance with packages from [jsr.io](https://jsr.io)
+
+via cli
+```
+$ pnpx @teidesu/slow-types-compiler populate
+Usage: slow-types-compiler populate <options> <pkg1> [pkg2] ...
+  --downstream: URL of the downstream registry (required)
+  --unstable-create-via-api: create packages via API
+  --token: API token
+  --publish-args: Additional arguments to pass to `deno publish`
+  --quiet, -q: Suppress output
+  <pkg1> [pkg2] ...: packages to populate (with version, e.g. `@std/fs@0.105.0`)
+```
+
+via js
+```ts
+import { populateFromUpstream } from '@teidesu/slow-types-compiler'
+
+populateFromUpstream({ ... })
+```
+
 ## limitations
 
 - jsr/npm libraries resolution is not fully supported (e.g. `@types/*`)
