@@ -1,7 +1,7 @@
 {
     "name": "@teidesu/slow-types-compiler",
     "type": "module",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "author": "alina sireneva <alina@tei.su>",
     "license": "MIT",
     "exports": {
