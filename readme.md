@@ -52,3 +52,4 @@ populateFromUpstream({ ... })
 
 - jsr/npm libraries resolution is not fully supported (e.g. `@types/*`)
 - merged namespaces are not supported
+- `paths` in tsconfig.json is not supported
