@@ -1,6 +1,6 @@
 # slow-types-compiler
 
-> ![WARNING]
+> [!CAUTION]
 > this package is deprecated. instead of this, consider using `isolatedTypeDeclarations` in TS 5.6+
 >
 > jsr-related utils have migrated to [@fuman/build](https://github.com/teidesu/fuman/blob/main/packages/build/README.md)
