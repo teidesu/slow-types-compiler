@@ -1,5 +1,10 @@
 # slow-types-compiler
 
+> ![WARNING]
+> this package is deprecated. instead of this, consider using `isolatedTypeDeclarations` in TS 5.6+
+>
+> jsr-related utils have migrated to [@fuman/build](https://github.com/teidesu/fuman/blob/main/packages/build/README.md)
+
 poc compiler for jsr [slow types](https://jsr.io/docs/about-slow-types)
 
 this package is intended to be a placeholder and a proof of concept while deno team comes up with a
